@@ -164,7 +164,7 @@ namespace BookRegistrationListview
         /// Enable Register Book Button when all input is valid
         /// Disable when all conditions not met
         /// </summary>
-        private void ToggleBtnRegister()
+        private void ToggleRegisterButton()
         {
             if (IsValid())
             {
@@ -202,7 +202,7 @@ namespace BookRegistrationListview
 
         private void dtpRegistration_ValueChanged(object sender, EventArgs e)
         {
-            ToggleBtnRegister();
+            ToggleRegisterButton();
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace BookRegistrationListview
 
         private void cbxBookTitle_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ToggleBtnRegister();
+            ToggleRegisterButton();
         }
     }
 }

@@ -20,23 +20,17 @@ namespace BookRegistrationListview
             InitializeComponent();
         }
 
-        // Joe's lecture: used when using Add Customwer Form separated with Manage Customer Form
-        public FrmManageCustomer(Customer c)
-        {
-            InitializeComponent(); // creates form controls
-
-            /* Joe's Code
-            btnAddCustomer.Text = "Update Customer";
-            txtTitle.Text = c.Title;
-            txtFirstName.Text = c.FirstName;
-            txtLastName.Text = c.LastName;
-            dtpDOB.Value = c.DateOfBirth;
-            */
-        }
-
         private void FrmManageCustomer_Load(object sender, EventArgs e)
         {
-            PoplulateCustomerListBox();
+            // create collumns for Customer listview
+            lviCustomers.Columns.Add("ID", 45, HorizontalAlignment.Left);
+            lviCustomers.Columns.Add("Title", 50, HorizontalAlignment.Left);
+            lviCustomers.Columns.Add("LastName", 100, HorizontalAlignment.Left);
+            lviCustomers.Columns.Add("FirstName", 100, HorizontalAlignment.Left);
+            lviCustomers.Columns.Add("DateOfBirth", 100, HorizontalAlignment.Left);
+
+            PoplulateCustomerListView();
+           // PoplulateCustomerListView();
 
             // disable tab index of some controls
             lblCustomerForm.TabStop = false;
@@ -47,17 +41,19 @@ namespace BookRegistrationListview
         }
 
         /// <summary>
-        /// Populates a listbox of Customers in from database
+        /// Populates a listview of Customers in from database
         /// </summary>
-        private void PoplulateCustomerListBox()
+        private void PoplulateCustomerListView()
         {
-            lstCustomers.Items.Clear();
+            lviCustomers.Items.Clear();
+
             List<Customer> customers = CustomerDB.GetAllCustomers();
 
-            foreach (Customer currCus in customers)
+            foreach (Customer currCustomer in customers)
             {
-                // Add entire customer object to listbox
-                lstCustomers.Items.Add(currCus);
+                ListViewItem item = new(new[] { currCustomer.CustomerID.ToString(), currCustomer.Title, currCustomer.LastName, currCustomer.FirstName, currCustomer.DateOfBirth.ToShortDateString() });
+                Tag = currCustomer;
+                lviCustomers.Items.Add(item);
             }
 
             // onload or when re-populating listbox after user's activities 
@@ -66,6 +62,7 @@ namespace BookRegistrationListview
             btnAddCustomer.Enabled = true;
             btnUpdateCustomer.Enabled = false;
             btnDeleteCustomer.Enabled = false;
+            
         }
 
         private void btnAddCustomer_Click(object sender, EventArgs e)
@@ -80,8 +77,11 @@ namespace BookRegistrationListview
                 Customer newCus = new Customer(title, firsName, lastName, dob);
 
                 CustomerDB.Add(newCus);
-                MessageBox.Show($"{newCus.FullName} has been added succesfully!");
-                PoplulateCustomerListBox();
+                MessageBox.Show($"'{newCus.FullName}' has been added succesfully!",
+                                "Successful!",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.None);
+                PoplulateCustomerListView();
                 clearTextbox();
             }
 
@@ -114,9 +114,9 @@ namespace BookRegistrationListview
                 {
                     lblErrMsg.Text = "All textboxes shouldn't be empty!";
                 }
-                if (dob >= DateTime.Today)
+                if (dob > DateTime.Today)
                 {
-                    lblErrMsg.Text = "Date of birth can't be greater than or equal to today!";
+                    lblErrMsg.Text = "Date of birth can't be greater than today!";
                 }
                 return false;
             }
@@ -133,115 +133,168 @@ namespace BookRegistrationListview
             txtFirstName.Text = "";
             txtLastName.Text = "";
             dtpDOB.Value = DateTime.Today;
-
+            lblErrMsg.Text = "";
         }
 
         private void btnDeleteCustomer_Click(object sender, EventArgs e)
         {
-            /* not neccessary when using button enable/disable 
-            // Return if no customer is selected
-            if (lstCustomers.SelectedIndex == -1)
-            {
-                MessageBox.Show("Please select a customer to delete!");
-                return;
-            }
-            */
+            var selectedCustomers = lviCustomers.SelectedItems;
 
-            Customer selectedCustomer = (Customer)lstCustomers.SelectedItem;
+            foreach (ListViewItem currItem in selectedCustomers)
+            {
+                int customerID = Convert.ToInt32(currItem.Text);
+                /* customerID is enough to delete a customer from DB
+                string title = currItem.SubItems[1].Text;
+                string lastName = currItem.SubItems[2].Text;
+                string firstName = currItem.SubItems[3].Text;
+                DateTime dob = DateTime.Parse(currItem.SubItems[4].Text);
 
-            int countRegistrationsByCustomerID = BookRegistrationDB.CountRegistrationsGroupByCustomerID(selectedCustomer.CustomerID);
+                Customer currCus = new(customerID, title, firstName, lastName, dob);
+                */
 
-            try
-            {
-                CustomerDB.Delete(selectedCustomer.CustomerID);
-                clearTextbox();
-                lblErrMsg.Text = "";
-                MessageBox.Show($"{selectedCustomer.FullName} has been deleted succesfully!");
-            }
-            catch (ArgumentException)
-            {
-                MessageBox.Show("That customer no longer exists");
-                PoplulateCustomerListBox();
-            }
-            catch (SqlException)
-            {
-                if (countRegistrationsByCustomerID > 0)
+                Customer currCus = CustomerDB.GetCustomer(customerID);
+
+               // count Registrations of selected Customer
+               int countRegistrationsByCustomerID = BookRegistrationDB.CountRegistrationsGroupByCustomerID(customerID);
+
+                try
                 {
-                    MessageBox.Show("You can't delete the Customers that already have Registrations. \n" +
-                                    "Please remove all Registrations for these Customers first!");
+                    CustomerDB.Delete(customerID);
+                    clearTextbox();
+                    lblErrMsg.Text = "";
+                    MessageBox.Show($"'{currCus.FullName}' has been deleted succesfully!",
+                                    "Successful!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.None);
                 }
-                else
+                catch (ArgumentException)
                 {
-                    MessageBox.Show("We are having server issues. Please try again later!");
+                    MessageBox.Show($"'{currCus.FullName}' no longer exists",
+                                    "Error!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                    PoplulateCustomerListView();
                 }
-                clearTextbox();
+                catch (SqlException)
+                {
+                    if (countRegistrationsByCustomerID > 0)
+                    {
+                        MessageBox.Show($"'{CustomerDB.GetCustomer(customerID).FullName}' already has Registrations. \n" +
+                                        $"Please remove all Registrations for '{currCus.FullName}' first!",
+                                        "Error!",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Exclamation);
+                    }
+                    else
+                    {
+                        MessageBox.Show("We are having server issues. Please try again later!",
+                                        "Error!",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Exclamation);
+                    }
+                    clearTextbox();
+                }
             }
 
-            PoplulateCustomerListBox();
+            PoplulateCustomerListView();
         }
 
         private void btnUpdateCustomer_Click(object sender, EventArgs e)
         {
-            /* not neccessary when using button enable/disable 
-            if (lstCustomers.SelectedIndex == -1)
-            {
-                MessageBox.Show("A customer must be selected!");
-                return;
-            }
-            */
-
-            Customer selectedCustomer = (Customer)lstCustomers.SelectedItem;
-
-            // Tung's code:
-
             if (IsValidInput())
             {
-                selectedCustomer.Title = Validator.FormalizeName(txtTitle.Text);
-                selectedCustomer.FirstName = Validator.FormalizeName(txtFirstName.Text);
-                selectedCustomer.LastName = Validator.FormalizeName(txtLastName.Text);
-                selectedCustomer.DateOfBirth = dtpDOB.Value.Date;
+                // get CustomerID from selected customer in listview
+                ListViewItem selectedCustomer = lviCustomers.SelectedItems[0];
+                int customerID = Convert.ToInt32(selectedCustomer.Text);
+                
+                string title = Validator.FormalizeName(txtTitle.Text);
+                string firstName = Validator.FormalizeName(txtFirstName.Text);
+                string lastName = Validator.FormalizeName(txtLastName.Text);
+                DateTime dob = dtpDOB.Value.Date;
 
-                CustomerDB.Update(selectedCustomer);
-                PoplulateCustomerListBox();
+                Customer updateCustomer = new(title, firstName, lastName, dob);
+                updateCustomer.CustomerID = customerID;
+
+                CustomerDB.Update(updateCustomer);
+                MessageBox.Show($"'{updateCustomer.FullName}' has been updated successfully!",
+                                "Successful!",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.None);
+                PoplulateCustomerListView();
                 clearTextbox();
             }
-
-
-            /*
-            // Joe's lecture:
-            FrmManageCustomer updateCustomer = new();
-            updateCustomer.ShowDialog();
-            */
         }
 
-        private void lstCustomers_SelectedIndexChanged(object sender, EventArgs e)
+        private void lviCustomers_SelectedIndexChanged(object sender, EventArgs e)
         {
-            lblErrMsg.Text = "";
-
-            // show a message when users click on blank part of listbox
-            if (lstCustomers.SelectedIndex == -1)
+            if (lviCustomers.SelectedItems.Count == 0)
             {
-                MessageBox.Show("Please select a customer to Update or Delete!");
+                btnDeleteCustomer.Enabled = false;
+                btnUpdateCustomer.Enabled = false;
+                btnAddCustomer.Enabled = true;
+                clearTextbox();
+                lblErrMsg.Text = "";
                 return;
             }
+            else
+            {
+                // enable Update and Delete buttons when 1 item is selected
+                if (lviCustomers.SelectedItems.Count == 1)
+                {
+                    btnUpdateCustomer.Enabled = true;
+                    ListViewItem selectedCustomer = lviCustomers.SelectedItems[0];
+                    int customerID = Convert.ToInt32(selectedCustomer.Text);
+                    txtTitle.Text = selectedCustomer.SubItems[1].Text;
+                    txtLastName.Text = selectedCustomer.SubItems[2].Text;
+                    txtFirstName.Text = selectedCustomer.SubItems[3].Text;
+                    dtpDOB.Value = DateTime.Parse(selectedCustomer.SubItems[4].Text);
+                }
 
-            // when users select an item
-            // enable Update button and Delete button
-            // disable Add button
-            btnUpdateCustomer.Enabled = true;
-            btnDeleteCustomer.Enabled = true;
-            btnAddCustomer.Enabled = false;
+                // disable Update button when multiple items are selected
+                else
+                {
+                    btnUpdateCustomer.Enabled = false;
+                    clearTextbox();
+                }
+                btnDeleteCustomer.Enabled = true;
+                btnAddCustomer.Enabled = false;
+            }
+        }
+             
+        /// <summary>
+        /// Enable Add Customer Button when all input is valid
+        /// Disable when all conditions not met
+        /// </summary>
+        private void ToggleAddButton()
+        {
+            if (IsValidInput())
+            {
+                btnAddCustomer.Enabled = true;
+            }
+            else
+            {
+                btnAddCustomer.Enabled = false;
+            }
+        }
 
-            Customer selectedCustomer = (Customer)lstCustomers.SelectedItem;
+        private void txtTitle_TextChanged(object sender, EventArgs e)
+        {
+            ToggleAddButton();
+        }
 
-            // Tung's code:
-            // show info to input textboxes when users select an item
-            txtTitle.Text = selectedCustomer.Title;
-            txtFirstName.Text = selectedCustomer.FirstName;
-            txtLastName.Text = selectedCustomer.LastName;
-            dtpDOB.Value = selectedCustomer.DateOfBirth;
+        private void txtFirstName_TextChanged(object sender, EventArgs e)
+        {
+            ToggleAddButton();
+        }
 
+        private void txtLastName_TextChanged(object sender, EventArgs e)
+        {
+            ToggleAddButton();
+        }
 
+        private void dtpDOB_ValueChanged(object sender, EventArgs e)
+        {
+            ToggleAddButton();
         }
     }
 }

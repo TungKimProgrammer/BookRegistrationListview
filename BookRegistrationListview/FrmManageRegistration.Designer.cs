@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.lblRegistrationManagingTool = new System.Windows.Forms.Label();
-            this.lstRegistrations = new System.Windows.Forms.ListBox();
             this.btnRemoveRegistration = new System.Windows.Forms.Button();
-            this.lstCustomers = new System.Windows.Forms.ListBox();
-            this.lstBooksAndRegDate = new System.Windows.Forms.ListBox();
             this.btnRemoveRegisteredBook = new System.Windows.Forms.Button();
             this.grbRegistrations = new System.Windows.Forms.GroupBox();
+            this.lviRegistrations = new System.Windows.Forms.ListView();
             this.grbCustomersAndBooks = new System.Windows.Forms.GroupBox();
+            this.lviBooksAndRegDate = new System.Windows.Forms.ListView();
+            this.lviCustomers = new System.Windows.Forms.ListView();
             this.grbRegistrations.SuspendLayout();
             this.grbCustomersAndBooks.SuspendLayout();
             this.SuspendLayout();
@@ -50,19 +50,9 @@
             this.lblRegistrationManagingTool.TabIndex = 0;
             this.lblRegistrationManagingTool.Text = "Registration Managing Application";
             // 
-            // lstRegistrations
-            // 
-            this.lstRegistrations.FormattingEnabled = true;
-            this.lstRegistrations.ItemHeight = 15;
-            this.lstRegistrations.Location = new System.Drawing.Point(10, 51);
-            this.lstRegistrations.Name = "lstRegistrations";
-            this.lstRegistrations.Size = new System.Drawing.Size(584, 304);
-            this.lstRegistrations.TabIndex = 3;
-            this.lstRegistrations.SelectedIndexChanged += new System.EventHandler(this.lstRegistrations_SelectedIndexChanged);
-            // 
             // btnRemoveRegistration
             // 
-            this.btnRemoveRegistration.Location = new System.Drawing.Point(453, 22);
+            this.btnRemoveRegistration.Location = new System.Drawing.Point(518, 22);
             this.btnRemoveRegistration.Name = "btnRemoveRegistration";
             this.btnRemoveRegistration.Size = new System.Drawing.Size(141, 23);
             this.btnRemoveRegistration.TabIndex = 4;
@@ -70,29 +60,9 @@
             this.btnRemoveRegistration.UseVisualStyleBackColor = true;
             this.btnRemoveRegistration.Click += new System.EventHandler(this.btnRemoveRegistration_Click);
             // 
-            // lstCustomers
-            // 
-            this.lstCustomers.FormattingEnabled = true;
-            this.lstCustomers.ItemHeight = 15;
-            this.lstCustomers.Location = new System.Drawing.Point(6, 47);
-            this.lstCustomers.Name = "lstCustomers";
-            this.lstCustomers.Size = new System.Drawing.Size(225, 124);
-            this.lstCustomers.TabIndex = 0;
-            this.lstCustomers.SelectedIndexChanged += new System.EventHandler(this.lstCustomers_SelectedIndexChanged);
-            // 
-            // lstBooksAndRegDate
-            // 
-            this.lstBooksAndRegDate.FormattingEnabled = true;
-            this.lstBooksAndRegDate.ItemHeight = 15;
-            this.lstBooksAndRegDate.Location = new System.Drawing.Point(250, 47);
-            this.lstBooksAndRegDate.Name = "lstBooksAndRegDate";
-            this.lstBooksAndRegDate.Size = new System.Drawing.Size(344, 124);
-            this.lstBooksAndRegDate.TabIndex = 1;
-            this.lstBooksAndRegDate.SelectedIndexChanged += new System.EventHandler(this.lstBooksAndRegDate_SelectedIndexChanged);
-            // 
             // btnRemoveRegisteredBook
             // 
-            this.btnRemoveRegisteredBook.Location = new System.Drawing.Point(433, 18);
+            this.btnRemoveRegisteredBook.Location = new System.Drawing.Point(498, 15);
             this.btnRemoveRegisteredBook.Name = "btnRemoveRegisteredBook";
             this.btnRemoveRegisteredBook.Size = new System.Drawing.Size(161, 23);
             this.btnRemoveRegisteredBook.TabIndex = 2;
@@ -102,32 +72,68 @@
             // 
             // grbRegistrations
             // 
-            this.grbRegistrations.Controls.Add(this.lstRegistrations);
+            this.grbRegistrations.Controls.Add(this.lviRegistrations);
             this.grbRegistrations.Controls.Add(this.btnRemoveRegistration);
             this.grbRegistrations.Location = new System.Drawing.Point(12, 241);
             this.grbRegistrations.Name = "grbRegistrations";
-            this.grbRegistrations.Size = new System.Drawing.Size(605, 361);
+            this.grbRegistrations.Size = new System.Drawing.Size(665, 361);
             this.grbRegistrations.TabIndex = 6;
             this.grbRegistrations.TabStop = false;
             this.grbRegistrations.Text = "Registrations";
             // 
+            // lviRegistrations
+            // 
+            this.lviRegistrations.FullRowSelect = true;
+            this.lviRegistrations.GridLines = true;
+            this.lviRegistrations.Location = new System.Drawing.Point(6, 51);
+            this.lviRegistrations.Name = "lviRegistrations";
+            this.lviRegistrations.Size = new System.Drawing.Size(653, 304);
+            this.lviRegistrations.TabIndex = 13;
+            this.lviRegistrations.UseCompatibleStateImageBehavior = false;
+            this.lviRegistrations.View = System.Windows.Forms.View.Details;
+            this.lviRegistrations.SelectedIndexChanged += new System.EventHandler(this.lviRegistrations_SelectedIndexChanged);
+            // 
             // grbCustomersAndBooks
             // 
-            this.grbCustomersAndBooks.Controls.Add(this.lstCustomers);
-            this.grbCustomersAndBooks.Controls.Add(this.lstBooksAndRegDate);
+            this.grbCustomersAndBooks.Controls.Add(this.lviBooksAndRegDate);
+            this.grbCustomersAndBooks.Controls.Add(this.lviCustomers);
             this.grbCustomersAndBooks.Controls.Add(this.btnRemoveRegisteredBook);
             this.grbCustomersAndBooks.Location = new System.Drawing.Point(12, 58);
             this.grbCustomersAndBooks.Name = "grbCustomersAndBooks";
-            this.grbCustomersAndBooks.Size = new System.Drawing.Size(605, 177);
+            this.grbCustomersAndBooks.Size = new System.Drawing.Size(665, 177);
             this.grbCustomersAndBooks.TabIndex = 7;
             this.grbCustomersAndBooks.TabStop = false;
             this.grbCustomersAndBooks.Text = "Customers and Registered Books";
+            // 
+            // lviBooksAndRegDate
+            // 
+            this.lviBooksAndRegDate.FullRowSelect = true;
+            this.lviBooksAndRegDate.GridLines = true;
+            this.lviBooksAndRegDate.Location = new System.Drawing.Point(270, 44);
+            this.lviBooksAndRegDate.Name = "lviBooksAndRegDate";
+            this.lviBooksAndRegDate.Size = new System.Drawing.Size(389, 127);
+            this.lviBooksAndRegDate.TabIndex = 14;
+            this.lviBooksAndRegDate.UseCompatibleStateImageBehavior = false;
+            this.lviBooksAndRegDate.View = System.Windows.Forms.View.Details;
+            this.lviBooksAndRegDate.SelectedIndexChanged += new System.EventHandler(this.lviBooksAndRegDate_SelectedIndexChanged);
+            // 
+            // lviCustomers
+            // 
+            this.lviCustomers.FullRowSelect = true;
+            this.lviCustomers.GridLines = true;
+            this.lviCustomers.Location = new System.Drawing.Point(6, 44);
+            this.lviCustomers.Name = "lviCustomers";
+            this.lviCustomers.Size = new System.Drawing.Size(253, 127);
+            this.lviCustomers.TabIndex = 13;
+            this.lviCustomers.UseCompatibleStateImageBehavior = false;
+            this.lviCustomers.View = System.Windows.Forms.View.Details;
+            this.lviCustomers.SelectedIndexChanged += new System.EventHandler(this.lviCustomers_SelectedIndexChanged);
             // 
             // FrmManageRegistration
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(631, 613);
+            this.ClientSize = new System.Drawing.Size(689, 613);
             this.Controls.Add(this.grbCustomersAndBooks);
             this.Controls.Add(this.grbRegistrations);
             this.Controls.Add(this.lblRegistrationManagingTool);
@@ -144,12 +150,12 @@
         #endregion
 
         private Label lblRegistrationManagingTool;
-        private ListBox lstRegistrations;
         private Button btnRemoveRegistration;
-        private ListBox lstCustomers;
-        private ListBox lstBooksAndRegDate;
         private Button btnRemoveRegisteredBook;
         private GroupBox grbRegistrations;
         private GroupBox grbCustomersAndBooks;
+        private ListView lviRegistrations;
+        private ListView lviBooksAndRegDate;
+        private ListView lviCustomers;
     }
 }

@@ -38,10 +38,10 @@
             this.lblDOB = new System.Windows.Forms.Label();
             this.dtpDOB = new System.Windows.Forms.DateTimePicker();
             this.btnAddCustomer = new System.Windows.Forms.Button();
-            this.lstCustomers = new System.Windows.Forms.ListBox();
             this.lblErrMsg = new System.Windows.Forms.Label();
             this.btnDeleteCustomer = new System.Windows.Forms.Button();
             this.btnUpdateCustomer = new System.Windows.Forms.Button();
+            this.lviCustomers = new System.Windows.Forms.ListView();
             this.SuspendLayout();
             // 
             // lblCustomerForm
@@ -69,6 +69,7 @@
             this.txtTitle.Name = "txtTitle";
             this.txtTitle.Size = new System.Drawing.Size(200, 23);
             this.txtTitle.TabIndex = 0;
+            this.txtTitle.TextChanged += new System.EventHandler(this.txtTitle_TextChanged);
             // 
             // lblFirstName
             // 
@@ -85,6 +86,7 @@
             this.txtFirstName.Name = "txtFirstName";
             this.txtFirstName.Size = new System.Drawing.Size(200, 23);
             this.txtFirstName.TabIndex = 1;
+            this.txtFirstName.TextChanged += new System.EventHandler(this.txtFirstName_TextChanged);
             // 
             // lblLastName
             // 
@@ -101,6 +103,7 @@
             this.txtLastName.Name = "txtLastName";
             this.txtLastName.Size = new System.Drawing.Size(200, 23);
             this.txtLastName.TabIndex = 2;
+            this.txtLastName.TextChanged += new System.EventHandler(this.txtLastName_TextChanged);
             // 
             // lblDOB
             // 
@@ -119,6 +122,7 @@
             this.dtpDOB.Size = new System.Drawing.Size(200, 23);
             this.dtpDOB.TabIndex = 3;
             this.dtpDOB.Value = new System.DateTime(2022, 11, 19, 20, 59, 48, 0);
+            this.dtpDOB.ValueChanged += new System.EventHandler(this.dtpDOB_ValueChanged);
             // 
             // btnAddCustomer
             // 
@@ -129,16 +133,6 @@
             this.btnAddCustomer.Text = "&Add Customer";
             this.btnAddCustomer.UseVisualStyleBackColor = true;
             this.btnAddCustomer.Click += new System.EventHandler(this.btnAddCustomer_Click);
-            // 
-            // lstCustomers
-            // 
-            this.lstCustomers.FormattingEnabled = true;
-            this.lstCustomers.ItemHeight = 15;
-            this.lstCustomers.Location = new System.Drawing.Point(317, 61);
-            this.lstCustomers.Name = "lstCustomers";
-            this.lstCustomers.Size = new System.Drawing.Size(397, 244);
-            this.lstCustomers.TabIndex = 5;
-            this.lstCustomers.SelectedIndexChanged += new System.EventHandler(this.lstCustomers_SelectedIndexChanged);
             // 
             // lblErrMsg
             // 
@@ -169,16 +163,28 @@
             this.btnUpdateCustomer.UseVisualStyleBackColor = true;
             this.btnUpdateCustomer.Click += new System.EventHandler(this.btnUpdateCustomer_Click);
             // 
+            // lviCustomers
+            // 
+            this.lviCustomers.FullRowSelect = true;
+            this.lviCustomers.GridLines = true;
+            this.lviCustomers.Location = new System.Drawing.Point(311, 61);
+            this.lviCustomers.Name = "lviCustomers";
+            this.lviCustomers.Size = new System.Drawing.Size(403, 241);
+            this.lviCustomers.TabIndex = 12;
+            this.lviCustomers.UseCompatibleStateImageBehavior = false;
+            this.lviCustomers.View = System.Windows.Forms.View.Details;
+            this.lviCustomers.SelectedIndexChanged += new System.EventHandler(this.lviCustomers_SelectedIndexChanged);
+            // 
             // FrmManageCustomer
             // 
             this.AcceptButton = this.btnAddCustomer;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(730, 322);
+            this.Controls.Add(this.lviCustomers);
             this.Controls.Add(this.btnUpdateCustomer);
             this.Controls.Add(this.btnDeleteCustomer);
             this.Controls.Add(this.lblErrMsg);
-            this.Controls.Add(this.lstCustomers);
             this.Controls.Add(this.btnAddCustomer);
             this.Controls.Add(this.dtpDOB);
             this.Controls.Add(this.lblDOB);
@@ -209,9 +215,9 @@
         private Label lblDOB;
         private DateTimePicker dtpDOB;
         private Button btnAddCustomer;
-        private ListBox lstCustomers;
         private Label lblErrMsg;
         private Button btnDeleteCustomer;
         private Button btnUpdateCustomer;
+        private ListView lviCustomers;
     }
 }

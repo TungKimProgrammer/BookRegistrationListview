@@ -35,7 +35,6 @@
             this.txtPrice = new System.Windows.Forms.TextBox();
             this.lblTitle = new System.Windows.Forms.Label();
             this.txtTitle = new System.Windows.Forms.TextBox();
-            this.lstBooks = new System.Windows.Forms.ListBox();
             this.btnAddBook = new System.Windows.Forms.Button();
             this.lblErrMsg = new System.Windows.Forms.Label();
             this.lblNotice = new System.Windows.Forms.Label();
@@ -102,16 +101,6 @@
             this.txtTitle.Size = new System.Drawing.Size(295, 23);
             this.txtTitle.TabIndex = 2;
             // 
-            // lstBooks
-            // 
-            this.lstBooks.FormattingEnabled = true;
-            this.lstBooks.ItemHeight = 15;
-            this.lstBooks.Location = new System.Drawing.Point(603, 109);
-            this.lstBooks.Name = "lstBooks";
-            this.lstBooks.Size = new System.Drawing.Size(40, 34);
-            this.lstBooks.TabIndex = 4;
-            this.lstBooks.SelectedIndexChanged += new System.EventHandler(this.lstBooks_SelectedIndexChanged);
-            // 
             // btnAddBook
             // 
             this.btnAddBook.Location = new System.Drawing.Point(365, 67);
@@ -158,7 +147,7 @@
             this.btnUpdateBook.TabIndex = 5;
             this.btnUpdateBook.Text = "&Update Book";
             this.btnUpdateBook.UseVisualStyleBackColor = true;
-            this.btnUpdateBook.Click += new System.EventHandler(this.bnUpdateBook_Click);
+            this.btnUpdateBook.Click += new System.EventHandler(this.btnUpdateBook_Click);
             // 
             // lviBooks
             // 
@@ -168,7 +157,7 @@
             this.lviBooks.Location = new System.Drawing.Point(12, 149);
             this.lviBooks.Name = "lviBooks";
             this.lviBooks.Size = new System.Drawing.Size(659, 290);
-            this.lviBooks.TabIndex = 11;
+            this.lviBooks.TabIndex = 4;
             this.lviBooks.UseCompatibleStateImageBehavior = false;
             this.lviBooks.View = System.Windows.Forms.View.Details;
             this.lviBooks.SelectedIndexChanged += new System.EventHandler(this.lviBooks_SelectedIndexChanged);
@@ -185,7 +174,6 @@
             this.Controls.Add(this.lblNotice);
             this.Controls.Add(this.lblErrMsg);
             this.Controls.Add(this.btnAddBook);
-            this.Controls.Add(this.lstBooks);
             this.Controls.Add(this.txtTitle);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.txtPrice);
@@ -210,7 +198,6 @@
         private TextBox txtPrice;
         private Label lblTitle;
         private TextBox txtTitle;
-        private ListBox lstBooks;
         private Button btnAddBook;
         private Label lblErrMsg;
         private Label lblNotice;

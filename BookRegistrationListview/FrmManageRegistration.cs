@@ -20,8 +20,26 @@ namespace BookRegistrationListview
 
         private void ManageRegistration_Load(object sender, EventArgs e)
         {
-            PoplulateRegistrationListBox();
-            PoplulateCustomerListBox();
+            // create collumns for Customer listview
+            lviCustomers.Columns.Add("ID", 30, HorizontalAlignment.Left);
+            lviCustomers.Columns.Add("FullName", 140, HorizontalAlignment.Left);
+            lviCustomers.Columns.Add("DateOfBirth", 75, HorizontalAlignment.Left);
+
+            // create collumns for Books and RegDates listview
+            lviBooksAndRegDate.Columns.Add("ISBN", 90, HorizontalAlignment.Left);
+            lviBooksAndRegDate.Columns.Add("Book Title", 160, HorizontalAlignment.Left);
+            lviBooksAndRegDate.Columns.Add("Price", 55, HorizontalAlignment.Left);
+            lviBooksAndRegDate.Columns.Add("Reg Date", 75, HorizontalAlignment.Left);
+
+            // create collumns for Registrations listview
+            lviRegistrations.Columns.Add("Customer ID", 90, HorizontalAlignment.Left);
+            lviRegistrations.Columns.Add("Full Name", 90, HorizontalAlignment.Left);
+            lviRegistrations.Columns.Add("ISBN", 150, HorizontalAlignment.Left);
+            lviRegistrations.Columns.Add("Book Title", 210, HorizontalAlignment.Left);
+            lviRegistrations.Columns.Add("Reg Date", 100, HorizontalAlignment.Left);
+
+            PoplulateRegistrationListView();
+            PoplulateCustomerListView();
 
             // disable tab index of some controls
             lblRegistrationManagingTool.TabStop = false;
@@ -32,44 +50,42 @@ namespace BookRegistrationListview
         /// <summary>
         /// Populates a listbox for all Registrations
         /// </summary>
-        private void PoplulateRegistrationListBox()
+        private void PoplulateRegistrationListView()
         {
-            lstRegistrations.Items.Clear();
+            lviRegistrations.Items.Clear();
 
             List<Registration> registrations = BookRegistrationDB.GetAllRegistrations();
 
             foreach (Registration currReg in registrations)
             {
-                // Add entire Registration object to listbox
-                lstRegistrations.Items.Add(currReg);
+                ListViewItem item = new(new[] { currReg.CustomerID.ToString(),
+                                                CustomerDB.GetCustomer(currReg.CustomerID).FullName,
+                                                currReg.ISBN,
+                                                BookDB.GetBook(currReg.ISBN).Title,
+                                                currReg.RegDate.ToShortDateString() }); ; ;
+                Tag = currReg;
+                lviRegistrations.Items.Add(item);
             }
 
             btnRemoveRegistration.Enabled = false;
-
-            // onload or when re-populating listbox after user's activities 
-            // enable Add button
-            // Update button and Delete button are disabled until an item in listbox selected
-            /*
-            txtISBN.Enabled = true;
-            btnAddBook.Enabled = true;
-            btnUpdateBook.Enabled = false;
-            btnDeleteBook.Enabled = false;
-            */
         }
 
         /// <summary>
-        /// Populates a listbox of all Customers who have registrations
+        /// Populates a listview of all Customers who have registrations
         /// </summary>
-        private void PoplulateCustomerListBox()
+        private void PoplulateCustomerListView()
         {
-            lstCustomers.Items.Clear();
+            lviCustomers.Items.Clear();
 
             List<Customer> customersWithRegistrations = CustomerDB.GetCustomersWithRegistrations();
 
-            foreach (Customer currCus in customersWithRegistrations)
+            foreach (Customer currCustomer in customersWithRegistrations)
             {
-                // Add entire Customer object to listbox
-                lstCustomers.Items.Add(currCus);
+                ListViewItem item = new(new[] { currCustomer.CustomerID.ToString(),
+                                                currCustomer.FullName,
+                                                currCustomer.DateOfBirth.ToShortDateString() });
+                Tag = currCustomer;
+                lviCustomers.Items.Add(item);
             }
 
             btnRemoveRegisteredBook.Enabled = false;
@@ -79,110 +95,155 @@ namespace BookRegistrationListview
         /// Populates a listbox of registered Books of a selected Customer 
         /// </summary>
         /// <param name="customerID"></param>
-        private void PoplulateBooksAndRegDateListBox(int customerID)
+        private void PoplulateBooksAndRegDateListView(int customerID)
         {
-            lstBooksAndRegDate.Items.Clear();
+            lviBooksAndRegDate.Items.Clear();
 
             List<Registration> registrationsByID = BookRegistrationDB.GetRegistrationsByCustomerID(customerID);
 
             foreach (Registration currReg in registrationsByID)
             {
-                // Add entire book object to listbox
-                lstBooksAndRegDate.Items.Add(BookDB.GetBook(currReg.ISBN));
+                ListViewItem item = new(new[] { currReg.ISBN,
+                                                BookDB.GetBook(currReg.ISBN).Title,
+                                                BookDB.GetBook(currReg.ISBN).Price.ToString("C"),
+                                                currReg.RegDate.ToShortDateString() });
+                Tag = currReg;
+                lviBooksAndRegDate.Items.Add(item);
             }
-        }
-
-        private void lstCustomers_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            // show a message when users click on blank part of listbox
-            if (lstCustomers.SelectedIndex == -1)
-            {
-                MessageBox.Show("Please select a customer to view registered books!");
-                return;
-            }
-            btnRemoveRegisteredBook.Enabled = false;
-            Customer selectedCustomer = lstCustomers.SelectedItem as Customer;
-            PoplulateBooksAndRegDateListBox(selectedCustomer.CustomerID);
-        }
-
-        private void lstRegistrations_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            // show a message when users click on blank part of listbox
-            if (lstRegistrations.SelectedIndex == -1)
-            {
-                MessageBox.Show("Please select a registration to remove!");
-                return;
-            }
-
-            btnRemoveRegistration.Enabled = true;
         }
 
         private void btnRemoveRegistration_Click(object sender, EventArgs e)
         {
-            Registration selectedReg = lstRegistrations.SelectedItem as Registration;
+            var selectedRegs = lviRegistrations.SelectedItems;
 
-            try
+            foreach (ListViewItem currItem in selectedRegs)
             {
-                BookRegistrationDB.Delete(selectedReg.CustomerID, selectedReg.ISBN);
-                MessageBox.Show($"{selectedReg} has been removed succesfully!");
-            }
-            catch (ArgumentException)
-            {
-                MessageBox.Show("That registration no longer exists");
-                PoplulateRegistrationListBox();
-                PoplulateCustomerListBox();
-                lstBooksAndRegDate.Items.Clear();
-            }
-            catch (SqlException)
-            {
-                MessageBox.Show("We are having server issues. Please try again later!");
+                int customerID = Convert.ToInt32(currItem.Text);
+                string isbn = currItem.SubItems[2].Text;
+
+                try
+                {
+                    BookRegistrationDB.Delete(customerID, isbn);
+                    MessageBox.Show($"Registration of '{CustomerDB.GetCustomer(customerID).FullName}' \n" +
+                                    $"for '{BookDB.GetBook(isbn).Title}' has been removed succesfully!", 
+                                    "Successful!", 
+                                    MessageBoxButtons.OK, 
+                                    MessageBoxIcon.None);
+                }
+                catch (ArgumentException)
+                {
+                    MessageBox.Show($"Registration of '{CustomerDB.GetCustomer(customerID).FullName}' \n" +
+                                    $"for '{BookDB.GetBook(isbn).Title}' no longer exists",
+                                    "Error!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                    PoplulateRegistrationListView();
+                    PoplulateCustomerListView();
+                    lviBooksAndRegDate.Items.Clear();
+                }
+                catch (SqlException)
+                {
+                    MessageBox.Show("We are having server issues. Please try again later!",
+                                    "Error!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Exclamation);
+                }
             }
 
-            PoplulateRegistrationListBox();
-            PoplulateCustomerListBox();
-            lstBooksAndRegDate.Items.Clear();
-            lstRegistrations.Focus();
+            PoplulateRegistrationListView();
+            PoplulateCustomerListView();
+            lviBooksAndRegDate.Items.Clear();
+            lviRegistrations.Focus();
         }
 
         private void btnRemoveRegisteredBook_Click(object sender, EventArgs e)
         {
-            Customer selectedCus = (Customer)lstCustomers.SelectedItem;
-            Book selectedBook = (Book)lstBooksAndRegDate.SelectedItem;
+            ListViewItem selectedCustomer = lviCustomers.SelectedItems[0];
+            int customerID = Convert.ToInt32(selectedCustomer.Text);
 
-            try
+            var selectedBooks = lviBooksAndRegDate.SelectedItems;
+
+            foreach (ListViewItem currItem in selectedBooks)
             {
-                BookRegistrationDB.Delete(selectedCus.CustomerID, selectedBook.ISBN);
-                MessageBox.Show($"Registration of {selectedCus.FullName} for {selectedBook.Title} has been removed succesfully!");
-            }
-            catch (ArgumentException)
-            {
-                MessageBox.Show("That registration no longer exists");
-                PoplulateRegistrationListBox();
-                PoplulateCustomerListBox();
-                lstBooksAndRegDate.Items.Clear();
-            }
-            catch (SqlException)
-            {
-                MessageBox.Show("We are having server issues. Please try again later!");
+                string isbn = currItem.Text;
+                try
+                {
+                    BookRegistrationDB.Delete(customerID, isbn);
+                    MessageBox.Show($"Registration of '{CustomerDB.GetCustomer(customerID).FullName}' \n" +
+                                    $"for '{BookDB.GetBook(isbn).Title}' has been removed succesfully!",
+                                    "Successful!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.None);
+                }
+                catch (ArgumentException)
+                {
+                    MessageBox.Show($"Registration of '{CustomerDB.GetCustomer(customerID).FullName}' \n" +
+                                    $"for '{BookDB.GetBook(isbn).Title}' no longer exists",
+                                    "Error!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                    PoplulateRegistrationListView();
+                    PoplulateCustomerListView();
+                    lviBooksAndRegDate.Items.Clear();
+                }
+                catch (SqlException)
+                {
+                    MessageBox.Show("We are having server issues. Please try again later!",
+                                    "Error!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Exclamation);
+                }
             }
 
-            PoplulateRegistrationListBox();
-            PoplulateCustomerListBox();
-            lstBooksAndRegDate.Items.Clear();
-            lstCustomers.Focus();
+
+
+            PoplulateRegistrationListView();
+            PoplulateCustomerListView();
+            lviBooksAndRegDate.Items.Clear();
+            lviRegistrations.Focus();
         }
 
-        private void lstBooksAndRegDate_SelectedIndexChanged(object sender, EventArgs e)
+
+        private void lviCustomers_SelectedIndexChanged(object sender, EventArgs e)
         {
             // show a message when users click on blank part of listbox
-            if (lstBooksAndRegDate.SelectedIndex == -1)
+            if (lviCustomers.SelectedItems.Count == 0)
             {
-                MessageBox.Show("Please select a book to remove the registration!");
-                btnRemoveRegisteredBook.Enabled = false;
                 return;
             }
 
-            btnRemoveRegisteredBook.Enabled = true;
+            btnRemoveRegisteredBook.Enabled = false;
+            ListViewItem selectedCustomer = lviCustomers.SelectedItems[0];
+            int customerID = Convert.ToInt32(selectedCustomer.Text);
+            PoplulateBooksAndRegDateListView(customerID);
+        }
+
+        private void lviRegistrations_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // show a message when users click on blank part of listbox
+            if (lviRegistrations.SelectedItems.Count == 0)
+            {
+                btnRemoveRegistration.Enabled = false;
+                return;
+            }
+            else
+            {
+                btnRemoveRegistration.Enabled = true;
+            }
+            
+        }
+
+        private void lviBooksAndRegDate_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lviBooksAndRegDate.SelectedItems.Count == 0)
+            {
+                btnRemoveRegisteredBook.Enabled = false;
+                return;
+            }
+            else
+            {
+                btnRemoveRegisteredBook.Enabled = true;
+            }
         }
     }
 }

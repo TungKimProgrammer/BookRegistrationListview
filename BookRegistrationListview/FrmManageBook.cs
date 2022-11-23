@@ -22,6 +22,7 @@ namespace BookRegistrationListview
 
         private void FrmManageBook_Load(object sender, EventArgs e)
         {
+            // create collumns for Book listview
             lviBooks.Columns.Add("ISBN", 120, HorizontalAlignment.Left);
             lviBooks.Columns.Add("Title", 450, HorizontalAlignment.Left);
             lviBooks.Columns.Add("Price", 80, HorizontalAlignment.Left);
@@ -37,6 +38,9 @@ namespace BookRegistrationListview
 
         }
 
+        /// <summary>
+        /// Populates a listview of Books from database
+        /// </summary>
         private void PoplulateBookListView()
         {
             lviBooks.Items.Clear();
@@ -59,29 +63,6 @@ namespace BookRegistrationListview
             btnDeleteBook.Enabled = false;
         }
 
-        /// <summary>
-        /// Populates a listbox of Books from database
-        /// </summary>
-        private void PoplulateBookListBox()
-        {
-            lstBooks.Items.Clear();
-            List<Book> books = BookDB.GetAllBooks();
-
-            foreach (Book currBook in books)
-            {
-                // Add entire book object to listbox
-                lstBooks.Items.Add(currBook);
-            }
-
-            // onload or when re-populating listbox after user's activities 
-            // enable Add button
-            // Update button and Delete button are disabled until an item in listbox selected
-            txtISBN.Enabled = true;
-            btnAddBook.Enabled = true;
-            btnUpdateBook.Enabled = false;
-            btnDeleteBook.Enabled = false;
-        }
-
         private void btnAddBook_Click(object sender, EventArgs e)
         {
             if (IsValid())
@@ -93,12 +74,12 @@ namespace BookRegistrationListview
                 Book newBook = new Book(isbn, title, price);
 
                 BookDB.Add(newBook);
-                MessageBox.Show($"'{newBook.Title}' has been added succesfully!");
+                MessageBox.Show($"'{newBook.Title}' has been added succesfully!",
+                                "Successful!",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.None);
                 PoplulateBookListView();
-                //PoplulateBookListBox();
                 clearTextbox();
-                //System.Threading.Thread.Sleep(3000);
-                //lblNotice.Text = "";
             }
         }
 
@@ -184,8 +165,9 @@ namespace BookRegistrationListview
 
             foreach (ListViewItem currItem in selectedBooks)
             {
-                Book currBook = new(currItem.Text, currItem.SubItems[1].Text, Convert.ToDouble(currItem.SubItems[2].Text.Substring(1)));
-
+                // Book currBook = new(currItem.Text, currItem.SubItems[1].Text, Convert.ToDouble(currItem.SubItems[2].Text.Substring(1)));
+                string isbn = currItem.Text;
+                Book currBook = BookDB.GetBook(isbn);
                 // count Registrations of selected Book
                 int countRegistrationsGroupByISBN = BookRegistrationDB.CountRegistrationsGroupByISBN(currBook.ISBN);
 
@@ -194,34 +176,44 @@ namespace BookRegistrationListview
                     BookDB.Delete(currBook);
                     clearTextbox();
                     lblErrMsg.Text = "";
-                    MessageBox.Show($"'{currBook.Title}' has been deleted succesfully!");
+                    MessageBox.Show($"'{currBook.Title}' has been deleted succesfully!",
+                                    "Successful!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.None);
                 }
                 catch (ArgumentException)
                 {
-                    MessageBox.Show($"'{currBook.Title}' no longer exists");
+                    MessageBox.Show($"'{currBook.Title}' no longer exists",
+                                    "Error!",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
                     PoplulateBookListView();
-                    //PoplulateBookListBox();
                 }
                 catch (SqlException)
                 {
                     if (countRegistrationsGroupByISBN > 0)
                     {
                         MessageBox.Show($"'{currBook.Title}' already has Registrations. \n" +
-                                        $"Please remove all Registrations for '{currBook.Title}' first!");
+                                        $"Please remove all Registrations for '{currBook.Title}' first!",
+                                        "Error!",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Exclamation);
                     }
                     else
                     {
-                        MessageBox.Show("We are having server issues. Please try again later!");
+                        MessageBox.Show("We are having server issues. Please try again later!",
+                                        "Error!",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Exclamation);
                     }
                     clearTextbox();
                 }
             }
 
             PoplulateBookListView();
-            //PoplulateBookListBox();
         }
 
-        private void bnUpdateBook_Click(object sender, EventArgs e)
+        private void btnUpdateBook_Click(object sender, EventArgs e)
         {
             if (IsValidInput())
             {
@@ -232,42 +224,14 @@ namespace BookRegistrationListview
                 Book updateBook = new(isbn, title, price);
 
                 BookDB.Update(updateBook);
-                MessageBox.Show($"'{updateBook.Title}' has been updated successfully!");
+                MessageBox.Show($"'{updateBook.Title}' has been updated successfully!",
+                                "Successful!",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.None);
 
                 PoplulateBookListView();
                 clearTextbox();
             }
-        }
-
-        private void lstBooks_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            lblErrMsg.Text = "";
-
-            // show a message when users click on blank part of listbox
-            if (lstBooks.SelectedIndex == -1)
-            {
-                MessageBox.Show("Please select a book to Update or Delete!");
-                return;
-            }
-
-            // when users select an item
-            // enable Update button and Delete button
-            // disable Add button
-            btnUpdateBook.Enabled = true;
-            btnDeleteBook.Enabled = true;
-            btnAddBook.Enabled = false;
-
-            Book selectedBook = (Book)lstBooks.SelectedItem;
-
-            // Tung's code:
-            // users are not allowed to update/modify ISBN of a book as it is unique
-            // in case of ISBN typos, best solution is to delete the item and add again
-            txtISBN.Enabled = false;
-
-            // show info to input textboxes when users select an item
-            txtISBN.Text = selectedBook.ISBN;
-            txtPrice.Text = selectedBook.Price.ToString();
-            txtTitle.Text = selectedBook.Title;
         }
 
         private void lviBooks_SelectedIndexChanged(object sender, EventArgs e)
@@ -280,10 +244,12 @@ namespace BookRegistrationListview
                 btnAddBook.Enabled = true;
                 clearTextbox();
 
+                /* this code to use with checkboxes
                 foreach (ListViewItem currItem in lviBooks.Items)
                 {
                     currItem.Checked = false;
                 }
+                */
                 return;
             }
             else
@@ -339,7 +305,6 @@ namespace BookRegistrationListview
             }
             */
         }
-
 
         public void lviBooks_ItemCheck(object sender, ItemCheckEventArgs e)
         {
